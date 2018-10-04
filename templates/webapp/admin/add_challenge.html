@@ -1,0 +1,71 @@
+{% extends 'webapp/base.html' %}
+{% block head %}
+    <title>{% if edit %}lifTUe - Edit challenge{% else %}lifTUe - Add challenge{% endif %}</title>{% endblock %}
+{% block content %}
+    <div class="text-center">
+        {% if edit %}
+            <h2>Edit challenge "{{ challenge.title }}"</h2>
+        {% else %}
+            <h2>Add challenge for event "{{ event.title }}"</h2>
+        {% endif %}
+        <hr/>
+    </div>
+    {% if form %}
+        <div class="col-12">
+        <form method="POST" class="col-10 offset-1 well">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}">Title</label>
+                {{ form.title }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">Description</label>
+                {{ form.description }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">Reward (HH:MM)</label>
+                {{ form.reward }}
+            </div>
+            {% if edit %}
+                <button type="submit" class="btn btn-primary text-center col-4 offset-4">Edit</button>
+            {% else %}
+                <button type="submit" class="btn btn-primary text-center col-4 offset-4">Add</button>
+            {% endif %}
+        </form>
+        <script>
+            {% if edit %}
+                // Split time
+                let time = "{{ reward }}";
+                time = time.split(":");
+                let hour = time[0];
+                let minute = time[1];
+                //Datetime picker
+                $("#id_reward").timepicker({
+                    timeFormat: "HH:mm",
+                    stepMinute: 5,
+                    hour: hour,
+                    minute: minute
+                });
+                $("#id_reward").val("{{ reward }}");
+            {% else %}
+                //Datetime picker
+                $("#id_reward").timepicker({
+                    timeFormat: "HH:mm",
+                    stepMinute: 5,
+                });
+            {% endif %}
+        </script>
+    {% else %}
+        {% if is_valid %}
+            {% if edit %}
+                <p class="text-center">Challenge successfully edited!</p>
+            {% else %}
+                <p class="text-center">Challenge successfully added! <a href="{% url 'add_challenge' event.pk %}">Add
+                    another</a></p>
+            {% endif %}
+        {% else %}
+            <p class="text-center">Something went wrong.</p>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

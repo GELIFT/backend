@@ -1,0 +1,38 @@
+{% extends "webapp/base.html" %}
+
+{% block head %}<title>lifTUe</title>{% endblock %}
+
+{% block content %}
+    <!-- First Parallax Section -->
+    <div class="jumbotron paral paralsec">
+        <h2 class="display-3">Welcome to lifTUe!</h2>
+    </div>
+
+    {% if event %}
+    <!-- Second Parallax Section -->
+    <div class="jumbotron paral paralsec1">
+        <div class="box-left"><h1 class="display-3">Running event</h1>
+            <p class="lead">Follow the state of the current event</p>
+            <p class="lead">
+                <a class="btn btn-info btn-lg btn-md" href="{% url 'event_detail' event.pk %}" role="button">To Live Tracking</a>
+            </p>
+        </div>
+        <div class="box-right">
+            <div class="image1"></div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Third Parallax Section -->
+    <div class="jumbotron paral paralsec2">
+        <div class="box-left">
+            <div class="image2"></div>
+        </div>
+        <div class="box-right"><h1 class="display-3">Past contests</h1>
+            <p class="lead">Here is a list of last years events</p>
+            <p class="lead">
+                <a class="btn btn-danger btn-lg btn-md" href="{% url 'event_list' %}" role="button">To the Past Contests</a>
+            </p>
+        </div>
+    </div>
+{% endblock %}

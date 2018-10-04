@@ -1,0 +1,36 @@
+{% extends "webapp/base.html" %}
+
+{% block head %}<title>lifTUe Login</title>{% endblock %}
+
+{% block content %}
+    <div class="text-center">
+        <h2>Login</h2>
+        <hr/>
+    </div>
+    <div class="col-12">
+        {% if form %}
+            <form method="post" class="well col-10 offset-1">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">Username</label>
+                    <input class="form-control" id="{{ form.email.id_for_label }}" name="{{ form.email.html_name }}"
+                           type="text" placeholder="Email"/>
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.password.id_for_label }}">Password</label>
+                    <input class="form-control" id="{{ form.password.id_for_label }}"
+                           name="{{ form.password.html_name }}" type="password" placeholder="Password"/>
+                    <p id="forgotten-password"><a href="{% url 'password_reset' %}">Forgotten password?</a></p>
+                </div>
+                <button type="submit" class="btn btn-lg btn-primary col-2 offset-5">Login</button>
+            </form>
+        {% endif %}
+    {% if success %}
+        <p class="text-center">You logged in successfully!</p>
+    {% endif %}
+    {% if not_admin %}
+        <p class="text-center">Only administrators can log in!</p>
+    {% endif %}
+
+    </div>
+{% endblock %}

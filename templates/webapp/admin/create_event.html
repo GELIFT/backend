@@ -1,0 +1,221 @@
+{% extends "webapp/base.html" %}
+{% load static %}
+
+
+{% block head %}<title>lifTUe - Event creation</title>{% endblock %}
+
+{% block content %}
+    <div class="text-center">
+        <h2>Add Event</h2>
+        <hr/>
+    </div>
+    <div class="col-12">
+        {% if user.is_superuser %}
+            {% if not request.POST %}
+                <form method="POST" class="col-10 offset-1 well">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="{{ form.title.id_for_label }}">Title </label>
+                        {{ form.title }}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.start_date.id_for_label }}">Start date </label>
+                        {{ form.start_date }}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.end_date.id_for_label }}">End date </label>
+                        {{ form.end_date }}
+                    </div>
+                    <div class="form-group">
+                        <label for="emergency_contact">Emergency contact (phone) </label>
+                        <input pattern=".{9,15}" required name="emergency_contact" title="9-15 characters"
+                               placeholder="Emergency contact (phone)" class="form-control"/>
+                    </div>
+                    <div class="row col-12 text-center">
+                        <div class="col-5"><strong>Start location</strong></div>
+                        <div class="col-5 offset-2"><strong>End location</strong></div>
+                    </div>
+                    <div class="row col-12">
+                        <div id="start-map-location" class="embedded-map-event-creation col-5"></div>
+                        <div id="end-map-location" class="embedded-map-event-creation col-5 offset-2"></div>
+                    </div>
+                    <div class="row col-12" style="margin-top:10px;">
+                        <div id="start-city-name" class="col-5 form-group">
+                            <label for="{{ form.start_city.id_for_label }}">Start city</label>
+                            {{ form.start_city }}
+                        </div>
+                        <div id="end-city-name" class="col-5 offset-2 form-group">
+                            <label for="{{ form.end_city.id_for_label }}">End city</label>
+                            {{ form.end_city }}
+                        </div>
+                    </div>
+                    {% if not active_event %}
+                        <div class="row col-12 form-group">
+                            <label for="{{ form.is_active.id_for_label }}">Is active </label>
+                            {{ form.is_active }}
+                        </div>
+                    {% endif %}
+                    <input type="hidden" name="start_location" id="start-location" value=""/>
+                    <input type="hidden" name="end_location" id="end-location" value=""/>
+
+                    <button type="submit" class="btn btn-primary col-2 offset-5" href="{% url 'new_event' %}"
+                            role="button">
+                        Create
+                    </button>
+                </form>
+                <script>
+                    let startMap;
+                    let startMarker;
+                    let endMap;
+                    let endMarker;
+                    let locationType;
+
+                    function geocoderCallback(city) {
+                        switch (locationType) {
+                            case "start":
+                                $("#id_start_city").val(city);
+                                break;
+                            case "end":
+                                $("#id_end_city").val(city);
+                                break;
+                            default:
+                                console.log("Error");
+                        }
+                    }
+
+                    function initMap() {
+                        // Google maps
+
+                        // Start location
+                        const latLngStart = new google.maps.LatLng(51.44, 5.49);
+
+                        const startOption = {
+                            zoom: 8,
+                            center: latLngStart
+                        };
+                        startMap = new google.maps.Map(document.getElementById('start-map-location'), startOption);
+                        startMarker = new google.maps.Marker({
+                            position: {
+                                lat: 51.44,
+                                lng: 5.49
+                            },
+                            map: startMap,
+                            draggable: true,
+                            animation: google.maps.Animation.DROP
+                        });
+
+                        // End location
+                        const latLngEnd = new google.maps.LatLng(51.44, 5.49);
+                        const endOption = {
+                            zoom: 8,
+                            center: latLngEnd
+                        };
+                        endMap = new google.maps.Map(document.getElementById('end-map-location'), endOption);
+                        endMarker = new google.maps.Marker({
+                            position: {
+                                lat: 51.44,
+                                lng: 5.49
+                            },
+                            map: endMap,
+                            draggable: true,
+                            animation: google.maps.Animation.DROP
+                        });
+                    }
+
+                    //Datetime picker
+                    $("#id_start_date").datetimepicker({
+                        timeInput: true,
+                        controlType: 'select',
+                        oneLine: true,
+                        timeFormat: 'HH:mm',
+                        dateFormat: 'yy-mm-dd',
+                        stepMinute: 15
+                    });
+                    //Datetime picker
+                    $("#id_end_date").datetimepicker({
+                        timeInput: true,
+                        controlType: 'select',
+                        oneLine: true,
+                        timeFormat: 'HH:mm',
+                        dateFormat: 'yy-mm-dd',
+                        stepMinute: 15
+                    });
+
+                    // JQuery
+                    $().ready(function () {
+                        // Create a location on page load
+                        $.ajax({
+                            method: "POST",
+                            url: "{% url 'add_location' %}",
+                            data: {
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+                                latitude: 51.44,
+                                longitude: 5.49
+                            },
+                            success: function (data) {
+                                // Update hidden value in form
+                                $("#start-location").val(data);
+                                $("#end-location").val(data);
+                            },
+                        });
+
+                        // When the start location marker is released
+                        google.maps.event.addListener(startMarker, 'dragend', function () {
+
+                            // Update location in database
+                            let latitude = startMarker.position.lat();
+                            let longitude = startMarker.position.lng();
+                            $.ajax({
+                                method: "POST",
+                                url: "{% url 'add_location' %}",
+                                data: {
+                                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                                    latitude: latitude,
+                                    longitude: longitude
+                                },
+                                success: function (data) {
+                                    // Update hidden value in form
+                                    $("#start-location").val(data);
+                                    // Reverse geocoding to get the city name
+                                    locationType = "start";
+                                    geocodeLatLng(latitude, longitude);
+                                },
+                            });
+                        });
+
+                        // When the end location marker is released
+                        google.maps.event.addListener(endMarker, 'dragend', function () {
+
+                            // Update location in database
+                            let latitude = endMarker.position.lat();
+                            let longitude = endMarker.position.lng();
+                            $.ajax({
+                                method: "POST",
+                                url: "{% url 'add_location' %}",
+                                data: {
+                                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                                    latitude: latitude,
+                                    longitude: longitude
+                                },
+                                success: function (data) {
+                                    // Update hidden value in form
+                                    $("#end-location").val(data);
+                                    // Reverse geocoding to get the city name
+                                    locationType = "end";
+                                    geocodeLatLng(latitude, longitude);
+                                },
+                            });
+                        });
+                    });
+                </script>
+                <script async defer
+                        src="https://maps.googleapis.com/maps/api/js?key={{ gmaps_key }}&callback=initMap">
+                </script>
+            {% else %}
+                <p class="text-center">The event was added successfully</p>
+            {% endif %}
+        {% elif user.is_staff %}
+            <p class="text-center">Only superuser can add events.</p>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends "webapp/base.html" %}
+
+{% block head %}<title>lifTUe - Challenges</title>{% endblock %}
+{% block content %}
+    <!-- CHALLENGE DELETION MODAL -->
+    <div class="modal fade col-4 offset-4" id="challenge-deletion-modal" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm challenge deletion</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <p id="challenge-deletion-text">Are you sure you want to delete this challenge?<br/><br/>
+                    <span style="color: red">Note: This is irreversible!</span></p>
+                <div class="modal-footer">
+                    <button type="button" class="btn col-6" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="challenge-delete-confirm-btn">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <h2 class="col-12">Challenges for event "{{ event.title }}"
+            {% if user.is_staff %}
+                <span class="float-right"><a href="{% url 'add_challenge' event.pk %}"><i
+                        class="fa fa-plus"></i> </a></span>
+            {% endif %}
+        </h2>
+        <hr/>
+    </div>
+    <div class="col-12 text-center well">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Reward (HH:MM)</th>
+                    {% if user.is_staff %}
+                        <th>Actions</th>
+                    {% endif %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for challenge in challenges %}
+                    <tr>
+                        <td class="title">
+                            <a href="{% url 'challenge_detail' challenge.pk %}">
+                                <span id="challenge-name-{{ challenge.pk }}">{{ challenge.title }}</span>
+                            </a>
+                        </td>
+                        <td>{{ challenge.description|truncatewords:"50" }}</td>
+                        <td>{{ challenge.reward }}</td>
+                        {% if user.is_staff %}
+                            <td>
+                                <a href="{% url 'edit_challenge' challenge.pk %}"><i class="fa fa-edit"></i></a>
+                                <i class="fa fa-times delete-challenge-icon" style="color: red"
+                                   id="delete-challenge-{{ challenge.pk }}"></i>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+    </div>
+    <script>
+        $().ready(function () {
+
+            // Challenge deletion
+            let challengeId;
+            $(".delete-challenge-icon").click(function () {
+
+                // Get the challenge ID
+                challengeId = $(this).attr('id');
+                challengeId = challengeId.replace(/\D+/g, '');
+
+                // Get the challenge name
+                let challengeName = $("#challenge-name-" + challengeId).text().trim();
+
+                // Set the modal text
+                $("#challenge-deletion-text").html('Are you sure you want to delete the challenge "'
+                    + challengeName + '"?<br/><br/>' +
+                    '<span style="color: red">Note: This is irreversible!</span>');
+
+                // Show the modal
+                $("#challenge-deletion-modal").modal('show');
+            });
+
+            // On click confirm button
+            $("#challenge-delete-confirm-btn").click(function () {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'delete_challenge' %}",
+                    data: {
+                        id: challengeId,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function () {
+                        location.reload();
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

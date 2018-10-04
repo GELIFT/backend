@@ -1,0 +1,322 @@
+{% extends 'webapp/base.html' %}
+{% block head %}<title>lifTUe - Edit teams</title>{% endblock %}
+{% block content %}
+    <!-- TEAM DELETION MODAL -->
+    <div class="modal fade col-4 offset-4" id="team-deletion-modal" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm team deletion</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <p id="team-deletion-modal-text"></p>
+                <div class="modal-footer">
+                    <button type="button" class="btn col-6" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="team-delete-confirm-btn">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- TEAM DISQUALIFICATION MODAL -->
+    <div class="modal fade col-4 offset-4" id="team-disqualification-modal" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm team disqualification</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <p id="team-disqualification-modal-text"></p>
+                <div class="modal-footer">
+                    <button type="button" class="btn col-6" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="team-disqualification-confirm-btn">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="event-dashboard">
+        <div class="text-center">
+            <h2>Edit teams for event "{{ event.title }}"</h2>
+            <hr/>
+        </div>
+        <div class="row" id="dashboard">
+            <!-- TEAMS -->
+            <div class="well col-6" id="teams">
+                <h4 class="text-center">Teams
+                    <span id="add-team-btn" class="float-right">
+                    <i class="fa fa-plus"></i>
+                </span>
+                </h4>
+                {% for team in team_composition %}
+                    <div class="row dashboard-row dropTarget team {% if team.team.is_disqualified %}danger{% endif %}"
+                         id="team-row-{{ team.team.pk }}">
+                        <p class="col-2">
+                            Team {{ forloop.counter }}
+                            {% if team.team.is_disqualified %}
+                                <i class="fa fa-share team-undisqualify-btn"
+                                   id="team-undisqualify-{{ team.team.pk }}"
+                                   title="Remove disqualification"></i>
+                            {% else %}
+                                <small>
+                                    <i class="fa fa-ban team-disqualify-btn" style="color: red"
+                                       id="team-disqualify-{{ team.team.pk }}"
+                                       title="Disqualify"></i>
+                                </small>
+                            {% endif %}
+                            <i class="fa fa-times delete-team-icon" style="color: red; font-size: small;"
+                               id="team-deletion-icon-{{ team.team.pk }}" title="Delete team"></i>
+                        </p>
+                        <p class="col-10 text-justify" id="team-members-{{ team.team.pk }}">
+                            {% for member in team.members %}
+                                <p class="btn btn-info draggable-user"
+                                   id="user-{{ member.pk }}"> {{ member.first_name }} {{ member.last_name }}</p>
+                            {% endfor %}
+                        </p>
+                    </div>
+                {% endfor %}
+            </div>
+            <!-- USERS -->
+            <div class="well col-6 dropTarget" id="unassigned-users">
+                <h4 class="text-center">Users</h4>
+                {% for user in unassigned_users %}
+                    {% if not user.is_superuser %}
+                        <p class="btn btn-info draggable-user"
+                           id="user-{{ user.pk }}">{{ user.first_name }} {{ user.last_name }}</p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <script>
+        $().ready(function () {
+
+            let userInTeam = false;
+            let oldTeamId = -1;
+            // Draggable user names
+            $(".draggable-user").draggable({
+                containment: "#dashboard",
+                // On drag event
+                start: function (event, ui) {
+                    // If user already in a team
+                    if ($(this).parent().hasClass('team')) {
+                        userInTeam = true;
+                        // Get old team ID
+                        oldTeamId = $(this).parent().attr('id').replace(/\D+/g, '');
+                    } else {
+                        userInTeam = false;
+                    }
+                }
+            });
+
+            // Places users can be dropped on
+            $('.dropTarget').droppable({
+                drop: function (ev, ui) {
+                    let dropped = ui.draggable;
+                    let droppedOn = $(this);
+                    // Count how many participants are in the team
+                    let users_count = droppedOn.find('.draggable-user').length;
+
+                    // Limit the team size to 3 users but not the unassigned column
+                    if (users_count < 3 || droppedOn.attr('id') === 'unassigned-users') {
+                        $(dropped).detach().css({top: 0, left: 0}).appendTo(droppedOn);
+                        // Check if the user is already in a team
+                        if (userInTeam) {
+                            // If the user is dropped on a team
+                            if (droppedOn.hasClass('team')) {
+
+                                // Get user ID and team ID
+                                let teamId = droppedOn.attr('id');
+                                teamId = teamId.replace(/\D+/g, '');
+                                let userId = dropped.attr('id');
+                                userId = userId.replace(/\D+/g, '');
+
+                                // POST request
+                                $.ajax({
+                                    type: "POST",
+                                    url: "{% url 'move_member' %}",
+                                    data: {
+                                        team_id: teamId,
+                                        old_team_id: oldTeamId,
+                                        user_id: userId,
+                                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                                    },
+                                    error: function () {
+                                        // Move the user back
+                                        console.log("Error")
+                                    }
+                                });
+                            }
+                            // If the user is dropped on unassigned
+                            else {
+                                let userId = dropped.attr('id');
+                                userId = userId.replace(/\D+/g, '');
+                                $.ajax({
+                                    type: "POST",
+                                    url: "{% url 'remove_member' %}",
+                                    data: {
+                                        team_id: oldTeamId,
+                                        user_id: userId,
+                                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                                    },
+                                    error: function () {
+                                        // Move the user back
+                                        console.log("Team ID: " + teamId);
+                                        console.log("User ID: " + userId);
+                                        console.log("Error")
+                                    }
+                                });
+                            }
+                        }
+                        // Else, if the user is not in a team yet
+                        else {
+                            // Drop on a team
+                            if (droppedOn.hasClass('team')) {
+                                let teamId = droppedOn.attr('id');
+                                teamId = teamId.replace(/\D+/g, '');
+                                let userId = dropped.attr('id');
+                                userId = userId.replace(/\D+/g, '');
+                                $.ajax({
+                                    type: "POST",
+                                    url: "{% url 'add_member' %}",
+                                    data: {
+                                        team_id: teamId,
+                                        user_id: userId,
+                                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                                    },
+                                    error: function () {
+                                        // Move the user back
+                                        $('#unassigned-users').append($("#user-" + userId));
+                                    }
+                                });
+                            }
+                        }
+                    }
+
+                    // Team full
+                    else {
+                        // Move it back
+                        $(dropped).css({top: 0, left: 0});
+                    }
+                }
+            });
+
+            // Team creation
+            $("#add-team-btn").click(function () {
+                // Create new team in database and reload the page
+                $.ajax({
+                    method: "POST",
+                    url: "{% url 'add_team' %}",
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        id: {{ event.pk }}
+                    },
+                    success: function () {
+                        // Reload the page to make the JQuery work
+                        location.reload();
+                    }
+                });
+            });
+
+            // Team deletion
+            let teamId;
+            $(".delete-team-icon").click(function () {
+                // Get the Team ID
+                teamId = $(this).attr('id');
+                teamId = teamId.replace(/\D+/g, '');
+
+                // Set the modal text
+                $("#team-deletion-modal-text").html('Are you sure you want to delete this team ?' +
+                    '<br/><br/><span style="color: red">' +
+                    ' Note: This will delete all associated scores and routes.<br/>This is irreversible!</span>');
+
+                // Show the modal
+                $("#team-deletion-modal").modal('show');
+            });
+
+            // On click confirm button
+            $("#team-delete-confirm-btn").click(function () {
+
+                // Move users back to unassigned
+                $('.draggable-user').each(function () {
+                    let parentId = 'team-row-' + teamId;
+                    if ($(this).parent().attr('id') === parentId) {
+                        $("#unassigned-users").append($(this));
+                    }
+                });
+
+                // POST request
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'delete_team' %}",
+                    data: {
+                        id: teamId,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function () {
+                        // Remove team from dashboard
+                        $("#team-row-" + teamId).remove();
+                        // Close the modal
+                        $("#team-deletion-modal").modal('hide');
+                    }
+                });
+            });
+
+            // Team disqualification
+            $(".team-disqualify-btn").click(function () {
+                // Get the Team ID
+                teamId = $(this).attr('id');
+                teamId = teamId.replace(/\D+/g, '');
+
+                // Get the team members
+                let teamMembers = $("#team-members-" + teamId).text();
+
+                // Set the modal text
+                $("#team-disqualification-modal-text").html('Are you sure you want to disqualify this team ?');
+
+                // Show the modal
+                $("#team-disqualification-modal").modal('show');
+            });
+
+            // On click confirm button
+            $("#team-disqualification-confirm-btn").click(function () {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'disqualify_team' %}",
+                    data: {
+                        id: teamId,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function () {
+                        // Reload the page
+                        location.reload();
+                    },
+                    error: function (a, text, error) {
+                        console.log(text + ":" + error);
+                    }
+                });
+            });
+
+            // Remove disqualification
+            $(".team-undisqualify-btn").click(function () {
+                // Get the Team ID
+                teamId = $(this).attr('id');
+                teamId = teamId.replace(/\D+/g, '');
+
+                $.ajax({
+                    method: "POST",
+                    url: "{% url 'undisqualify_team' %}",
+                    data: {
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                        id: teamId
+                    },
+                    success: function () {
+                        location.reload();
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

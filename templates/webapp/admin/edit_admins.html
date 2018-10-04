@@ -1,0 +1,82 @@
+{% extends 'webapp/base.html' %}
+{% block head %}<title>lifTUe - Edit administrators</title>{% endblock %}
+{% block content %}
+    <div id="event-dashboard">
+        <div class="text-center">
+            <h2>Edit administrators</h2>
+            <hr/>
+        </div>
+        <div class="row" id="dashboard">
+            <!-- ADMINS -->
+            <div class="well col-6 dropTarget" id="admins">
+                <h4 class="text-center">Administrators</h4>
+                {% for user in users %}
+                    {% if user.is_staff %}
+                        <p class="btn btn-info draggable-user"
+                           id="user-{{ user.pk }}">{{ user.first_name }} {{ user.last_name }}</p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <!-- USERS (NON-ADMINS) -->
+            <div class="well col-6 dropTarget" id="unassigned-users">
+                <h4 class="text-center">Users</h4>
+                {% for user in users %}
+                    {% if not user.is_staff %}
+                        <p class="btn btn-info draggable-user"
+                           id="user-{{ user.pk }}">{{ user.first_name }} {{ user.last_name }}</p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <script>
+        $().ready(function () {
+
+            let userId = -1;
+            // Draggable user names
+            $(".draggable-user").draggable({
+                containment: "#dashboard",
+                // On drag event
+                start: function (event, ui) {
+                    // Retrieve user ID
+                    userId = $(this).attr('id').replace(/\D+/g, '');
+                }
+            });
+
+            // Places users can be dropped on
+            $('.dropTarget').droppable({
+                drop: function (ev, ui) {
+                    let dropped = ui.draggable;
+                    let droppedOn = $(this);
+                    $(dropped).detach().css({top: 0, left: 0}).appendTo(droppedOn);
+
+                    // If dropped on "Administrators"
+                    if (droppedOn.attr('id') === "admins") {
+                        // Add user to administrators
+                        $.ajax({
+                            method: "POST",
+                            url: "{% url 'add_administrator' %}",
+                            data: {
+                                csrfmiddlewaretoken: "{{ csrf_token }}",
+                                id: userId
+                            }
+                        });
+                    }
+                    // Otherwise
+                    else {
+                        // Remove user from administrators
+                        $.ajax({
+                            method: "POST",
+                            url: "{% url 'remove_administrator' %}",
+                            data: {
+                                csrfmiddlewaretoken: "{{ csrf_token }}",
+                                id: userId
+                            }
+                        });
+                    }
+                }
+            });
+
+        });
+    </script>
+{% endblock %}

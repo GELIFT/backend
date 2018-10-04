@@ -1,0 +1,81 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="shortcut icon" href="{% static 'favicon.png' %}"/>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
+          integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+
+    <!-- Other CSS and JS -->
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,700' rel='stylesheet' type='text/css'/>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css"
+          integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{% static "css/main.css" %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static "css/jquery-ui.css" %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static "css/jquery-ui-timepicker-addon.css" %}"/>
+</head>
+{% block head %} {% endblock %}
+
+<body class="d-flex flex-column">
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"
+        integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"
+        crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+        integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+        crossorigin="anonymous"></script>
+<script src="{% static 'js/jquery-ui-timepicker-addon.js' %}"></script>
+<script src="{% static 'js/geocoder.js' %}"></script>
+<script src="{% static 'js/file-input.js' %}"></script>
+
+
+<nav class="navbar navbar-expand-lg navbar-fixed-top">
+    <a class="navbar-brand" href="{% url 'index' %}"><img id="logo" src="{% static "/images/logo_white.png" %}"></a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="white-text"><i class="fa fa-bars fa-1x"></i></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ml-auto pull-right">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'event_list' %}">Past contests</a>
+            </li>
+            {% if user.is_staff %}
+                <li class="nav-item">
+                    <a href="{% url 'admin_dashboard' %}" class="nav-link"> Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'logout' %}" class="nav-link">Log out</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a href="{% url 'login' %}" class="nav-link">Admin</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+
+<section class="container-fluid">
+    {% block content %} {% endblock %}
+</section>
+<footer class="bg-dark text-white container-fluid">
+    <div class="container">
+        <p class="col-12 text-center">&copy; GELIFT 2018</p>
+    </div>
+</footer>
+</body>
+</html>

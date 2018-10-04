@@ -1,0 +1,66 @@
+{% extends 'webapp/base.html' %}
+{% block head %}<title>lifTUe - Edit event winners</title>{% endblock %}
+{% block content %}
+    <div class="text-center">
+        <h2>Event winners</h2>
+        <hr/>
+    </div>
+    <div class="col-12 row" id="admin-dashboard">
+        {% if not new_entry %}
+            <form method="post" class="col-10 offset-1 well" enctype="multipart/form-data">
+                {% csrf_token %}
+                <label for="{{ form.team_id.id_for_label }}">Winners</label>
+                <select class="form-control" name="team_id">
+                    {% for data in team_composition %}
+                        <option value="{{ data.team.pk }}"
+                                {% if edit and not is_valid and data.team.pk is winners.0.id %}
+                                selected
+                                {% endif %}
+                        >
+                            {% for member in data.members %}
+                                {{ member.first_name }}
+                                {% if not forloop.last %}&amp;{% endif %}
+                            {% endfor %}
+                        </option>
+                    {% endfor %}
+                </select>
+                <div id="form-control">
+                    <label for="{{ form.photo.id_for_label }}">Winner picture</label><br/>
+                    {% if photo %}
+                        <img src="/{{ photo.url }}" alt="Winner picture"
+                             style="max-height: 20vh; height: auto; width: auto;">
+                    {% endif %}
+                    <input type="file" name="photo"
+                           title="{% if edit %}Change picture{% else %} Select picture{% endif %}"
+                           data-filename-placement="inside"/>
+                </div>
+                <button type="submit" class="btn btn-primary col-2 offset-5">
+                    {% if not edit and not validated %}
+                        Submit
+                    {% else %}
+                        Edit
+                    {% endif %}
+                </button>
+            </form>
+            <script>
+                $("input[type=file]").bootstrapFileInput();
+            </script>
+        {% else %}
+            {% if is_valid %}
+                {% if edit %}
+                    <p class="text-center col-12">
+                        Winner successfully edited. <a href="{% url 'edit_event' event.pk %}">Back.</a>
+                    </p>
+                {% else %}
+                    <p class="text-center col-12">
+                        Winner successfully added. <a href="{% url 'edit_event' event.pk %}">Back.</a>
+                    </p>
+                {% endif %}
+            {% else %}
+                <p class="text-center col-12">
+                    Something went wrong. <a href="#" onclick="history.go(-1)">Back.</a>
+                </p>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endblock %}

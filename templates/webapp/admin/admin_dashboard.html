@@ -1,0 +1,146 @@
+{% extends "webapp/base.html" %}
+
+{% block head %}<title>lifTUe Dashboard</title>{% endblock %}
+
+{% block content %}
+    <div class="text-center">
+        <h2>Admin Dashboard</h2>
+        <hr/>
+    </div>
+    <div class="col-12 row" id="admin-dashboard">
+        <div class="col-5 offset-1 well">
+            <h4 class="text-center">
+                Events
+                <span class="float-right">
+                    <a href="{% url 'event_list' %}"><i class="fa fa-ellipsis-h" title="All events"></i></a>
+                    {% if user.is_superuser %}
+                        <a href="{% url 'new_event' %}"><i class="fa fa-plus" title="Add an event"></i> </a>
+                    {% endif %}
+                </span>
+            </h4>
+            <hr/>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Start city</th>
+                    <th>End city</th>
+                    <th>Start date</th>
+                    <th>Active</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for event in events %}
+                    <tr>
+                        <td>{{ event.title }}</td>
+                        <td>{{ event.start_city }}</td>
+                        <td>{{ event.end_city }}</td>
+                        <td>{{ event.start_date|date:"d-m-Y" }}</td>
+                        <td class="text-center">
+                            {% if event.is_active %}
+                                <i class="fa fa-check-circle no-click" style="color: green" title="Active"></i>
+                            {% else %}
+                                <i class="fa fa-times-circle no-click" style="color: red" title="Inactive"></i>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <a href="{% url 'edit_event' event.pk %}"><i class="fa fa-edit"></i> </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-5 well">
+            <h4 class="text-center">
+                Users
+                <span class="float-right">
+                    <a href="{% url 'user_list' %}"><i class="fa fa-ellipsis-h" title="All users"></i></a>
+                    {% if user.is_superuser %}
+                        <a href="{% url 'edit_admins' %}"><i class="fa fa-users" title="Edit administrators"></i> </a>
+                        <a href="{% url 'add_user' %}"><i class="fa fa-plus" title="Add a user"></i> </a>
+                    {% endif %}
+                </span>
+
+            </h4>
+            <hr/>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Administrator</th>
+                    {% if user.is_superuser %}
+                        <th>Actions</th>
+                    {% endif %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for user_detail in users %}
+                    <tr>
+                        <td>{{ user_detail.first_name }} {{ user_detail.last_name }}</td>
+                        <td>{{ user_detail.email }}</td>
+                        <td class="text-center">
+                            {% if user_detail.is_staff %}
+                                <i class="fa fa-check-circle no-click" style="color: green" title="Administrator"></i>
+                            {% else %}
+                                <i class="fa fa-times-circle no-click" style="color: red" title="User"></i>
+                            {% endif %}
+                        </td>
+                        {% if user.is_superuser %}
+                            <td class="text-center">
+                                {% if user_detail.is_staff %}
+                                    <i class="fa fa-arrow-circle-down revoke" title="Revoke administrator privileges"
+                                       id="revoke-{{ user_detail.pk }}"></i>
+                                {% else %}
+                                    <i class="fa fa-arrow-circle-up grant" title="Grant administrator privileges"
+                                       id="grant-{{ user_detail.pk }}"></i>
+                                {% endif %}
+                                <a href="{% url 'edit_user' user_detail.pk %}">
+                                    <i class="fa fa-edit" title="Edit user"></i>
+                                </a>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        $().ready(function () {
+            let revokeBtn = $(".revoke");
+            let grantBtn = $(".grant");
+
+            revokeBtn.click(function () {
+                let userId = $(this).attr('id').replace(/\D+/g, '');
+                $.ajax({
+                    method: "POST",
+                    url: "{% url 'remove_administrator' %}",
+                    data: {
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                        id: userId,
+                    },
+                    success: function () {
+                        location.reload();
+                    }
+                });
+            });
+            grantBtn.click(function () {
+                let userId = $(this).attr('id').replace(/\D+/g, '');
+                $.ajax({
+                    method: "POST",
+                    url: "{% url 'add_administrator' %}",
+                    data: {
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                        id: userId,
+                    },
+                    success: function () {
+                        location.reload();
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

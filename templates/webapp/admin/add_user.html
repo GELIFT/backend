@@ -1,0 +1,51 @@
+{% extends "webapp/base.html" %}
+
+{% block head %}<title>lifTUe - {% if not edit %}Add user{% else %}Edit user{% endif %}</title>{% endblock %}
+
+{% block content %}
+    <div class="text-center">
+        <h2>{% if not edit %}Add user{% else %}Edit user{% endif %}</h2>
+        <hr/>
+    </div>
+    <div class="col-12">
+        {% if form %}
+            <form method="POST" class="col-10 offset-1 well">
+                <div class="form-group">
+                    {% csrf_token %}
+                    <label for="{{ form.email.id_for_label }}">Email</label>
+                    {{ form.email }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.first_name.id_for_label }}">First name</label>
+                    {{ form.first_name }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.last_name.id_for_label }}">Last name</label>
+                    {{ form.last_name }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.is_staff.id_for_label }}">Administrator:</label>
+                    {{ form.is_staff }}
+                </div>
+                <button type="submit" class="col-2 offset-5 btn btn-primary text-center">
+                    {% if not edit %}Add{% else %}Edit{% endif %}
+                </button>
+            </form>
+        {% else %}
+            {% if not edit %}
+                {% if is_valid %}
+                    <p class="text-center">User successfully added! <a href="{% url 'add_user' %}">Add another</a></p>
+                {% else %}
+                    <p class="text-center">Something went wrong, maybe the user already exists? <a
+                            href="{% url 'add_user' %}">Back</a></p>
+                {% endif %}
+            {% else %}
+                {% if is_valid %}
+                    <p class="text-center">User successfully edited!</p>
+                {% else %}
+                    <p class="text-center">Something went wrong!</p>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    </div>
+{% endblock %}

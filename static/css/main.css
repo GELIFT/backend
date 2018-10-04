@@ -1,0 +1,525 @@
+html {
+    position: relative;
+    min-height: 100%;
+}
+body {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    min-height:100%;
+    overflow: auto;
+    padding-bottom: 150px;
+    padding-top: 100px;
+}
+footer {
+    position:fixed;
+    bottom:0;
+}
+footer p {
+    padding: 5px 10px 5px 10px;
+}
+
+.flex-grow {
+    flex: 1;
+}
+
+.nav-link {
+    font-size: 16pt;
+}
+
+.navbar {
+    background-color: #D93747;
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    top:0;
+    z-index: 2;
+}
+
+.navbar-nav .nav-link {
+    color: #ffffff;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #aaaaaa;
+}
+
+#logo {
+    width: 100px;
+}
+
+nav {
+    margin-bottom: 10px;
+}
+
+font:hover {
+    color: black;
+}
+
+.well {
+    background-color: whitesmoke;
+    padding:15px;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+}
+
+label {
+    text-align: left;
+    font-size: 11pt;
+}
+
+.jumbotron {
+    margin-bottom: 0px;
+}
+
+#event-map {
+    height: 500px;
+    margin-bottom: 15px;
+}
+
+#winners {
+    background-image: url("../images/winner2017.png");
+    height: 650px;
+}
+
+#ScoreBoard {
+    background-image: url("../images/score.png");
+    height: 400px;
+}
+
+.jumbotron h2 {
+    font-size: 40px;
+    font-weight: 500;
+    margin: 0;
+    color: black;
+}
+
+.jumbotron h3 {
+    margin: 0 0 20px;
+    color: black;
+}
+
+section .row img {
+    margin: 0 0 30px;
+    width: 100%;
+}
+
+.col-md-6 {
+    margin: 0 0 30px;
+}
+
+#admin-buttons-wrapper {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn.btn-primary { /* FOR THE MAIN PAGE BUTTONS*/
+    width: 100%;
+    font-size: 20px;
+    text-align: center;
+    margin-top: 10px;
+    border-radius: 4px;
+    border: 1px solid grey;
+    color: black;
+    text-shadow: none;
+    background-color: #ffffff;
+}
+
+.btn.btn-default { /* FOR THE DEFAULT BUTTONS*/
+    width: 100%;
+    font-size: 20px;
+    text-align: center;
+    margin-top: 10px;
+    border-radius: 4px;
+    border: 1px solid grey;
+    color: black;
+    text-shadow: none;
+    background-color: #ffffff;
+}
+
+.btn.btn-default:hover { /* FOR THE DEFAULT BUTTONS*/
+    width: 100%;
+    font-size: 20px;
+    text-align: center;
+    margin-top: 10px;
+    border-radius: 4px;
+    border: 1px solid grey;
+    color: black;
+    text-shadow: none;
+    background-color: whitesmoke;
+}
+
+.admin-button {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 100px;
+    padding-right: 100px;
+}
+
+.btn.btn-primary:hover { /* FOR THE MAIN PAGE BUTTONS*/
+    color: white;
+    background-color: black;
+}
+
+.btn-secondary { /* FOR THE MAIN PAGE BUTTONS*/
+    background-color: black;
+    color: black;
+    margin: 0 0 30px;
+}
+
+/*FOR PAST CONTESTS, MAP, SCOREBOARD PAGES*/
+#contest-list .btn.btn-primary {
+    width: 700px;
+}
+
+
+#contest-list .well {
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    border-radius: 0px;
+    border: 1px solid white;
+}
+
+#sublocation-dashboard .well {
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    border-radius: 0px;
+    border: 1px solid white;
+}
+
+#admin-dashboard .well {
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    border-radius: 0px;
+    border: 1px solid white;
+}
+
+#contest-list h4 {
+    border-bottom: 1px solid rgba(179,179,179,0.45);
+    padding-bottom: 10px;
+}
+
+#contest-list h2, #login-contest-list {
+    padding-bottom: 20px;
+    border-bottom: 1px solid black;
+    font-weight: bold;
+    margin-top: 40px;
+    margin-bottom: 30px;
+}
+
+/*LIVE TRACKING*/
+.container-x {
+    border: 2px solid black;
+    margin-bottom: 50px;
+}
+
+#ScoreBoard-visible {
+    background-image: url("../images/Unblurred_score.png");
+    height: 400px;
+}
+
+/*ADMIN LOGIN PAGE*/
+
+/*
+/* Created by Filipe Pina
+ * Specific styles of signin, register, component
+ */
+/*
+ * General styles
+ */
+
+.main {
+    margin-top: 0px;
+    padding-bottom: 50px;
+}
+
+h1.title {
+    font-size: 50px;
+    font-family: 'Passion One', cursive;
+    font-weight: 400;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    margin-bottom: 15px;
+}
+
+input,
+input::-webkit-input-placeholder {
+    font-size: 11px;
+    padding-top: 3px;
+}
+
+.main-login {
+    background-color: #fff;
+    margin-bottom: 30px;
+    /* shadows and rounded borders */
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+    -moz-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+
+}
+
+.main-center {
+    margin-top: 30px;
+
+    margin: 0 auto;
+    max-width: 330px;
+    padding: 40px 40px;
+
+}
+
+.login-button {
+    margin-top: 5px;
+}
+
+.login-register {
+    font-size: 11px;
+    text-align: center;
+}
+
+#login-contest-list {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+/*ADMIN EVENT */
+#createEventButton {
+    border-radius: 10px;
+    background: #D93747;
+    max-width: 300px;
+}
+
+#event-dashboard {
+    width:90%;
+    margin: auto;
+}
+#event-dashboard .well {
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    border-radius: 0px;
+    border: 1px solid white;
+}
+/* MAPS */
+.embedded-map {
+    width: 100%;
+    height: 100px;
+    margin-bottom: 10px;
+}
+
+.embedded-map-event-creation {
+    width: 100%;
+    height: 400px;
+    margin-top: 10px;
+}
+
+#big-map {
+    width:100%;
+    height: 100%;
+    min-height: 100%;
+    background-color: #ffffff;
+}
+
+#edit-map {
+    position: absolute;
+    width: 100%;
+    height: 70vh;
+    margin-top: 15px;
+}
+
+/* Modals */
+.modal-content {
+    padding: 10px;
+}
+
+.modal-header {
+    margin-bottom: 10px;
+}
+
+.dashboard-row {
+    border-bottom: 1px solid rgba(100,100,100,0.45);
+    margin-top: 10px;
+    padding-bottom: 10px;
+}
+
+#event-dashboard h4 {
+    border-bottom: 1px solid rgba(179,179,179,0.45);
+    padding-bottom: 10px;
+}
+#event-dashboard a {
+    color: black;
+}
+#event-dashboard a:hover {
+    opacity:0.5;
+}
+i:hover {
+    opacity: 0.5;
+    cursor: pointer;
+}
+.text-button {
+    border: 1px solid rgba(179,179,179,0.45);
+    border-radius: 5px;
+    padding: 5px;
+}
+.text-button:hover {
+    background-color: rgba(0,0,0,0.06);
+    cursor: pointer;
+}
+
+#event-name {
+    margin-top: -40px;
+}
+
+.sublocation:hover {
+    opacity: 0.75;
+    cursor: move;
+}
+
+#sublocation-map {
+    height:60vh;
+}
+#team-row-disqualified {
+    background-color: darkgray;
+}
+
+/* PARALLAX STUFF */
+
+
+/* Header Parallax Element Style*/
+.paral {
+min-height: 600px;
+background-attachment: fixed;
+background-size: cover;
+background-position: 50% 50%;
+}
+
+/* Paragraph for Parallax Section */
+.paral p {
+font-size: 24px;
+color: #000000;
+text-align: center;
+line-height: 60px;
+}
+
+/* Heading for Parallax Section */
+.paral h1 {
+color: rgb(0, 0, 0);
+font-size: 60px;
+text-align: center;
+padding-top: 60px;
+line-height: 100px;
+}
+
+.paral h2 {
+color: rgb(255, 255, 255);
+font-size: 80px;
+text-align: center;
+vertical-align: middle;
+    background: rgba(31, 31, 31, 0.66);
+    line-height: 300px;
+}
+
+.box-left{
+    width: 40vw;
+    float:left;
+}
+.box-right{
+    width: 40vw;
+    float:right;
+}
+
+.container-fluid {
+    padding-right:0;
+    padding-left:0;
+    margin-right:auto;
+    margin-left:auto
+ }
+
+
+/* Image for Parallax Section */
+.paralsec {
+background-image: url("../images/hitch.jpg");
+    line-height: 600px;
+    padding-left: 50px;
+    padding-right: 50px;
+}
+
+.paralsec1 {
+    /*background-image: url("../images/map_blurry.png");*/
+    background-color: white;
+}
+
+.paralsec2 {
+    /*background-image: url("../images/score.png");*/
+    background-color: lightgray;
+}
+
+div.image1 {
+   width:512px; /*width of your image*/
+   height:512px; /*height of your image*/
+   background-image:url("../images/location.png");
+   margin-left: 50px;
+    margin-right: 50px;
+    margin-bottom: 50px;
+   padding:0; /*if your want to padding */
+}
+
+div.image2 {
+   width:512px; /*width of your image*/
+   height:512px; /*height of your image*/
+   background-image:url("../images/history.png");
+   margin-left: 50px;
+    margin-right: 50px;
+    margin-bottom: 50px;
+   padding:0; /*if your want to padding */
+}
+
+
+
+.danger {
+    background-color: #f2dede !important;
+}
+
+.no-click:hover {
+    cursor: default;
+    opacity: 1;
+}
+
+
+
+
+label {
+    margin-bottom: -10px;
+    margin-left: 5px;
+}
+
+#forgotten-password {
+    margin-left: 5px;
+    margin-top: 5px;
+}
+
+/* TEAM COLORS */
+.event-team-color {
+    background-color: red;
+    width: 10px;
+    height: 10px;
+    margin-top: 7px;
+    margin-right: 5px;
+    margin-left: 10px;
+}
+
+.team-color {
+    width: auto;
+    text-align: center;
+}
+a i {
+    color: black;
+}
+

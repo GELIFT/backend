@@ -1,0 +1,19 @@
+{% extends "webapp/base.html" %}
+
+{% block head %}<title>lifTUe - Challenge details</title>{% endblock %}
+{% block content %}
+    <div class="text-center">
+        <h2>Challenge "{{ challenge.title }}"</h2>
+        <hr/>
+    </div>
+    <div class="col-12 row text-center">
+        <div class="well col-10 offset-1 text-justify">
+            <h5>Title</h5>
+            <p>{{ challenge.title }}</p>
+            <h5>Description</h5>
+            <p>{{ challenge.description }}</p>
+            <h5>Reward (HH:MM)</h5>
+            <p>{{ reward }}</p>
+        </div>
+    </div>
+{% endblock %}

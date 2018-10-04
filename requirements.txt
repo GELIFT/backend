@@ -1,0 +1,17 @@
+six
+geocoder
+simplejson
+Django
+setuptools
+pytz
+pip
+psycopg2
+djangorestframework
+Markdown
+requests
+django-filter
+fcm-django
+coverage
+Pillow
+django_extensions
+pydot

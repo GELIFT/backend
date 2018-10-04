@@ -1,0 +1,71 @@
+{% extends "webapp/base.html" %}
+
+{% block head %}<title>lifTUe Events</title>{% endblock %}
+
+{% block content %}
+    <div class="text-center">
+        <h2 class="col-12">Events
+            {% if user.is_superuser %}
+                <a class="float-right" href="{% url 'new_event' %}">
+                    <i class="fa fa-plus"></i>
+                </a>
+            {% endif %}
+        </h2>
+        <hr/>
+    </div>
+    <div class="row text-center col-12" id="contest-list">
+            <!-- CURRENT EVENT -->
+            <span class="col-8 well">
+            <h4><strong>Active Events</strong></h4>
+                <table class="table">
+                    <thead>
+                    <th>Title</th>
+                    <th>Start date</th>
+                    <th>End date</th>
+                    <th>Start city</th>
+                    <th>End city</th>
+                    {% if user.is_staff %}
+                        <th>Actions</th>
+                    {% endif %}
+                    </thead>
+                    <tbody>
+                        {% for event in active_events %}
+                            <td><a href="{% url 'event_detail' event.pk %}">{{ event.title }}</a></td>
+                            <td>{{ event.start_date|date:"d-m-Y H:i" }}</td>
+                            <td>{{ event.end_date|date:"d-m-Y H:i" }}</td>
+                            <td>{{ event.start_city }}</td>
+                            <td>{{ event.end_city }}</td>
+                            {% if user.is_staff %}
+                                <td><a href="{% url 'edit_event' event.pk %}"><i class="fa fa-edit"></i> </a></td>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </span>
+
+            <!-- PAST EVENTS -->
+            <span class="col-4 well">
+            <h4><strong>Other Events</strong></h4>
+            <table class="table">
+                <thead>
+                    <th>Title</th>
+                    <th>Start date</th>
+                    {% if user.is_staff %}
+                        <th>Actions</th>
+                    {% endif %}
+                </thead>
+                <tbody>
+                    {% for event in inactive_events %}
+                        <tr>
+                        <td><a href="{% url 'event_detail' event.pk %}">{{ event.title }}</a></td>
+                        <td>{{ event.start_date|date:"d-m-Y H:i" }}</td>
+                            {% if user.is_staff %}
+                                <td><a href="{% url 'edit_event' event.pk %}"><i class="fa fa-edit"></i> </a></td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </span>
+    </div>
+{% endblock %}

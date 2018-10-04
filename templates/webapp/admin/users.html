@@ -1,0 +1,134 @@
+{% extends 'webapp/base.html' %}
+{% block head %}{% endblock %}
+{% block content %}
+    <!-- USER DELETION MODAL -->
+    <div class="modal fade col-4 offset-4" id="user-deletion-modal" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm user deletion</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <p>Are you sure you want to delete this user?<br/><br/>
+                    <span style="color: red"> Note: This will remove the user from all teams he is associated to.<br/>
+                This is irreversible!</span></p>
+                <div class="modal-footer">
+                    <button type="button" class="btn col-6" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="user-delete-confirm-btn">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="text-center">
+        <h2>Users</h2>
+        <hr/>
+    </div>
+    <div class="col-12 row">
+        <div class="col-10 offset-1 well">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>First name</th>
+                    <th>Last name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Administrator</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.first_name }}</td>
+                        <td>{{ user.last_name }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.phone }}</td>
+                        <td>
+                            {% if user.is_staff %}
+                                <i class="fa fa-check-circle no-click" style="color: green" title="Administrator"></i>
+                            {% else %}
+                                <i class="fa fa-times-circle no-click" style="color: red" title="User"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.is_staff %}
+                                <i class="fa fa-arrow-circle-down revoke" title="Revoke administrator privileges"
+                                   id="revoke-{{ user.pk }}"></i>
+                            {% else %}
+                                <i class="fa fa-arrow-circle-up grant" title="Grant administrator privileges"
+                                   id="grant-{{ user.pk }}"></i>
+                            {% endif %}
+                            <a href="{% url 'edit_user' user.pk %}"><i class="fa fa-edit" title="Edit user"></i></a>
+                            <i class="fa fa-times user-delete" style="color: red" title="Delete user"
+                               id="delete-{{ user.pk }}"></i>
+
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        $().ready(function () {
+            let revokeBtn = $(".revoke");
+            let grantBtn = $(".grant");
+
+            revokeBtn.click(function () {
+                let userId = $(this).attr('id').replace(/\D+/g, '');
+                $.ajax({
+                    method: "POST",
+                    url: "{% url 'remove_administrator' %}",
+                    data: {
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                        id: userId,
+                    },
+                    success: function () {
+                        location.reload();
+                    }
+                });
+            });
+            grantBtn.click(function () {
+                let userId = $(this).attr('id').replace(/\D+/g, '');
+                $.ajax({
+                    method: "POST",
+                    url: "{% url 'add_administrator' %}",
+                    data: {
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                        id: userId,
+                    },
+                    success: function () {
+                        location.reload();
+                    }
+                });
+            });
+
+            // User deletion
+            let userId;
+            let userDeletionBtn = $(".user-delete");
+            let userDeletionConf = $("#user-delete-confirm-btn");
+            let userDeletionModal = $("#user-deletion-modal");
+
+            userDeletionBtn.click(function () {
+                userId = $(this).attr('id').replace(/\D+/g, '');
+                userDeletionModal.modal('show');
+            });
+
+            userDeletionConf.click(function () {
+                $.ajax({
+                    method: "POST",
+                    url: "{% url 'delete_user' %}",
+                    data: {
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                        id: userId
+                    },
+                    success: function () {
+                        location.reload()
+                    }
+                })
+            });
+        });
+    </script>
+{% endblock %}

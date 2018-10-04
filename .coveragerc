@@ -1,0 +1,16 @@
+[run]
+omit =
+    *venv/*
+    *backend/tests/*
+    *backend/migrations/*
+    *init.py*
+    *apps.py*
+    *functions.py*
+    *models.py*
+    *urls.py*
+    *static/*
+    *templates/*
+    *webapp*
+    *GELIFT/*
+    *serializers.py*
+    *manage.py*

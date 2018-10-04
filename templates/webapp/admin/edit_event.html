@@ -1,0 +1,1273 @@
+{% extends 'webapp/base.html' %}
+{% block head %}<title>lifTUe - Edit event</title>{% endblock %}
+{% block content %}
+    <!-- EVENT DELETION MODAL -->
+    <div class="modal fade col-4 offset-4" id="event-deletion-modal" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm event deletion</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <p>Are you sure you want to delete the event "{{ event.title }}"?<br/><br/>
+                    <span style="color: red"> Note: This will delete all associated teams, challenges and scores.<br/>
+                This is irreversible!</span></p>
+                <div class="modal-footer">
+                    <button type="button" class="btn col-6" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="event-delete-confirm-btn">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- TEAM DELETION MODAL -->
+    <div class="modal fade col-4 offset-4" id="team-deletion-modal" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm team deletion</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <p id="team-deletion-modal-text"></p>
+                <div class="modal-footer">
+                    <button type="button" class="btn col-6" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="team-delete-confirm-btn">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- TEAM DISQUALIFICATION MODAL -->
+    <div class="modal fade col-4 offset-4" id="team-disqualification-modal" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm team disqualification</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <p id="team-disqualification-modal-text"></p>
+                <div class="modal-footer">
+                    <button type="button" class="btn col-6" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="team-disqualification-confirm-btn">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- SUB-DESTINATION DELETION MODAL -->
+    <div class="modal fade col-4 offset-4" id="subdestination-deletion-modal" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm sub-destination deletion</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <p id="sublocation-deletion-text">Are you sure you want to delete this sub-destination?<br/><br/>
+                    <span style="color: red">Note: This is irreversible!</span></p>
+                <div class="modal-footer">
+                    <button type="button" class="btn col-6" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="sublocation-delete-confirm-btn">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- CHALLENGE DELETION MODAL -->
+    <div class="modal fade col-4 offset-4" id="challenge-deletion-modal" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm challenge deletion</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <p id="challenge-deletion-text">Are you sure you want to delete this challenge?<br/><br/>
+                    <span style="color: red">Note: This is irreversible!</span></p>
+                <div class="modal-footer">
+                    <button type="button" class="btn col-6" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="challenge-delete-confirm-btn">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- WINNER DELETION MODAL -->
+    <div class="modal fade col-4 offset-4" id="winner-deletion-modal" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm winner deletion</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <p id="winner-deletion-modal-text">Are you sure you want to remove the winner for this event?</p>
+                <div class="modal-footer">
+                    <button type="button" class="btn col-6" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="winner-delete-confirm-btn">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- START/END LOCATION EDIT VIEW -->
+    <div id="big-map" class="col-12">
+        <div class="row dashboard-row">
+            <h4 class="col-10 offset-1 text-center">Edit location
+                <span class="float-right">
+                    <i class="fa fa-check" id="close-map-save" title="Save"></i>
+                    <i class="fa fa-times" style="color: red" id="close-map" title="Close"></i>
+                </span>
+            </h4>
+        </div>
+        <div id="edit-map" class="col-10 offset-1"></div>
+    </div>
+    <div id="event-dashboard">
+        <div class="col-12">
+            {% if user.is_staff %}
+                <div class="text-center">
+                    <h2 id="title"><span id="title-text">{{ event.title }}</span>
+                        {% if user.is_superuser %}
+                            <span class="float-right">
+                                    <span id="title-edit-btn">
+                                        <i class="fa fa-edit" title="Edit event title"></i>
+                                    </span>
+                                    <span id="event-delete-btn" data-toggle="modal" data-target="#event-deletion-modal">
+                                        <i class="fa fa-times" style="color: red" title="Delete event"></i>
+                                    </span>
+                                </span>
+                        {% endif %}
+                    </h2>
+                    <h2 id="title-edit">
+                        <form id="title-form">
+                            <input type="text" value="{{ event.title }}" id="title-input"/>
+                            <i class="fa fa-check" id="validate-title-edit" title="Save"></i>
+                            <i class="fa fa-times" style="color:red;" id="close-title-edit" title="Close"></i>
+                        </form>
+                    </h2>
+                    <hr/>
+                </div>
+            {% endif %}
+        </div>
+        <div class="row text-center">
+
+            <!-- DATES -->
+            <span class="col-4 well">
+                <h4>Dates</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Start date</td>
+                            <td id="start-date-text">{{ event.start_date|date:"d-m-Y H:i" }}</td>
+                            {% if user.is_superuser %}
+                                <td id="start-date-edit-btn">
+                                    <i class="fa fa-edit" title="Edit start date"></i>
+                                </td>
+                                <td id="td-start-date-form">
+                                    <form id="start-date-form" class="col-4">
+                                        <input type="text" id="start-date-input" placeholder="Start date"/>
+                                    </form>
+                                </td>
+                                <td id="td-start-date-save">
+                                    <i id="start-date-save-btn" class="fa fa-check" title="Save"></i>
+                                    <i id="start-date-close-btn" class="fa fa-times" title="Discard"
+                                       style="color:red;"></i>
+                                </td>
+                            {% endif %}
+
+                        </tr>
+                        <tr>
+                            <td>End date</td>
+                            <td id="end-date-text">{{ event.end_date|date:"d-m-Y H:i" }}</td>
+                            {% if user.is_superuser %}
+                                <td id="end-date-edit-btn">
+                                    <i class="fa fa-edit" title="Edit end date"></i>
+                                </td>
+                                <td id="td-end-date-form">
+                                    <form id="end-date-form" class="col-4">
+                                        <input type="text" id="end-date-input" placeholder="End date"/>
+                                    </form>
+                                </td>
+                                <td id="td-end-date-save">
+                                    <i id="end-date-save-btn" class="fa fa-check" title="Save"></i>
+                                    <i id="end-date-close-btn" class="fa fa-times" title="Discard"
+                                       style="color:red;"></i>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    </tbody>
+                </table>
+            </span>
+
+            <!-- LOCATIONS -->
+            <span class="col-4 well">
+                <h4>Locations</h4>
+                <table class="table">
+                    <tbody>
+                        <!-- START CITY -->
+                        <tr class="col-12">
+                            <td {% if user.is_superuser %}class="col-4"{% else %} class="col-6"{% endif %}>Start location</td>
+                            <td {% if user.is_superuser %}class="col-4"{% else %} class="col-6"{% endif %}>
+                                <span id="start-map">
+                                    <div id="start-map-location" class="embedded-map"> </div>
+                                </span>
+                            </td>
+                            {% if user.is_superuser %}
+                                <td id="start-map-edit-btn" class="col-4">
+                                    <i class="fa fa-edit" title="Edit"></i>
+                                </td>
+                            {% endif %}
+                        </tr>
+                        <tr class="col-12">
+                            <td {% if user.is_superuser %}class="col-4"
+                                {% else %} class="col-6"{% endif %}>
+                                Start city
+                            </td>
+                            <td {% if user.is_superuser %}class="col-4 start-city"
+                                {% else %} class="col-6 start-city"{% endif %}>
+                                <span id="start-city-text">{{ event.start_city }}</span>
+                            </td>
+                            {% if user.is_superuser %}
+                                <td id="start-city-edit-btn" class="col-4 start-city">
+                                    <i class="fa fa-edit" title="Edit"></i>
+                                </td>
+                                <td id="start-city-form" class="col-4">
+                                    <form>
+                                        <input type="text" id="start-city-input" value="{{ event.start_city }}"
+                                               placeholder="End city name"/>
+                                    </form>
+                                </td>
+                                <td id="td-start-city-actions">
+                                    <span class="col-2">
+                                        <i class="fa fa-check" id="start-city-save-btn"></i>
+                                        <i class="fa fa-times" id="start-city-close-btn" style="color: red;"></i>
+                                    </span>
+                                </td>
+                            {% endif %}
+                        </tr>
+
+                        <!-- END CITY -->
+                        <tr class="col-12">
+                            <td {% if user.is_superuser %}class="col-4"{% else %}
+                                class="col-6"{% endif %}>End location</td>
+                            <td {% if user.is_superuser %}class="col-4"{% else %} class="col-6"{% endif %}>
+                                <span id="end-map">
+                                    <div id="end-map-location" class="embedded-map"> </div>
+                                </span>
+                            </td>
+                            {% if user.is_superuser %}
+                                <td id="end-map-edit-btn" class="col-4">
+                                    <i class="fa fa-edit" title="Edit"></i>
+                                </td>
+                            {% endif %}
+                        </tr>
+                        <tr class="col-12">
+                            <td {% if user.is_superuser %}class="col-4"
+                                {% else %} class="col-6"{% endif %}>
+                                End city
+                            </td>
+                            <td {% if user.is_superuser %}class="col-4 end-city"
+                                {% else %} class="col-6 end-city"{% endif %}>
+                                <span id="end-city-text">{{ event.end_city }}</span>
+                            </td>
+                            {% if user.is_superuser %}
+                                <td id="end-city-edit-btn" class="col-4 end-city">
+                                    <i class="fa fa-edit" title="Edit"></i>
+                                </td>
+                                <td id="end-city-form" class="col-4">
+                                    <form>
+                                        <input type="text" id="end-city-input" value="{{ event.end_city }}"
+                                               placeholder="End city name"/>
+                                    </form>
+                                </td>
+                                <td id="td-end-city-actions">
+                                    <span class="col-2">
+                                        <i class="fa fa-check" id="end-city-save-btn"></i>
+                                        <i class="fa fa-times" id="end-city-close-btn" style="color: red;"></i>
+                                    </span>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    </tbody>
+                </table>
+            </span>
+
+            <!-- SUBDESTINATIONS -->
+            <span class="col-4 well">
+            <h4>Sub-destinations {% if user.is_superuser %}
+                <a href="{% url 'edit_sublocation' event.pk %}"><i class="fa fa-edit" title="Edit"></i> </a> {% endif %} </h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Sub-destination</th>
+                            <th>City</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for subloc in sub_locations %}
+                            <tr id="sublocation-row-{{ subloc.pk }}">
+
+                                <td>
+                                #{{ forloop.counter }}
+                                </td>
+                                <td id="sublocation-name-{{ subloc.pk }}">
+                                    {{ subloc.city }}
+                                </td>
+                                <td class="col-4">
+                                    {% if user.is_superuser %}
+                                        <i class="fa fa-times delete-sublocation-icon" style="color:red;"
+                                           id="sublocation-delete-icon-{{ subloc.pk }}" title="Delete"></i>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </span>
+        </div>
+
+        <!-- SECOND ROW -->
+        <div class="row text-center">
+
+            <!-- TEAMS -->
+            <span class="col-4 well">
+            <h4>Teams <a href="{% url 'edit_teams' event.pk %}"><i class="fa fa-edit" title="Edit"></i> </a></h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Team</th>
+                            <th>Members</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for team in team_composition|slice:":5" %}
+                        <tr class="{% if team.team.is_disqualified %}danger{% endif %}"
+                            id="team-row-{{ team.team.pk }}">
+                            <td>
+                                #{{ forloop.counter }}
+                            </td>
+                            <td id="team-members-{{ team.team.pk }}">
+                            {% for member in team.members %}
+                                {{ member.first_name }} {% if not forloop.last %}&amp; {% endif %}
+                            {% endfor %}
+                            </td>
+                            <td>
+                                {% if team.team.is_disqualified %}
+                                    <i class="fa fa-share team-undisqualify-btn"
+                                       id="team-undisqualify-{{ team.team.pk }}"
+                                       title="Remove disqualification"></i>
+                                {% else %}
+                                    <small>
+                                    <i class="fa fa-ban team-disqualify-btn" style="color: red"
+                                       id="team-disqualify-{{ team.team.pk }}"
+                                       title="Disqualify"></i>
+                                    </small>
+                                {% endif %}
+                                <i class="fa fa-times delete-team-icon" style="color: red;"
+                                   id="team-deletion-icon-{{ team.team.pk }}" title="Delete"></i>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </span>
+
+            <!-- CHALLENGES -->
+            <span class="col-4 well">
+            <h4>
+                Challenges <a href="{% url 'challenge' event.pk %}">
+                <i class="fa fa-edit" title="Edit"></i> </a>
+            </h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Challenge</th>
+                        <th>Title</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for challenge in challenges %}
+                    <tr>
+                        <td class="col-4 ">
+                            #{{ forloop.counter }}
+                        </td>
+                        <td>
+                            <span id="challenge-name-{{ challenge.pk }}">{{ challenge.title }}</span>
+                        </td>
+                        <td>
+                            <i class="fa fa-times delete-challenge-icon" style="color: red"
+                               id="delete-challenge-{{ challenge.pk }}" title="Delete"></i>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </span>
+
+            <!-- OTHER -->
+            <span class="well col-4">
+            <h4>Other</h4>
+            <div class="row dashboard-row text-left">
+                <span class="col-12">
+                Event winners
+                <span class="float-right">
+                    {% if event_winner %}
+                        {% for team in team_composition %}
+                            {% if team.team.is_winner %}
+                                {% for member in team.members %}
+                                    {{ member.first_name }}
+                                    {% if not forloop.last %}&amp; {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                        <a href="{% url 'edit_winners' event.pk %}"><i class="fa fa-edit" title="Edit"></i> </a>
+                        <i class="fa fa-times" style="color: red;" title="Remove winner" id="remove-winner"></i>
+                    {% else %}
+                        <a href="{% url 'set_winners' event.pk %}">
+                            <span class="float-right text-button">Set winner</span>
+                        </a>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="row dashboard-row text-left">
+                    <span id="emergency-contact" class="col-12">
+                        Emergency contact
+                            <span class="float-right">
+                                <span id="emergency-contact-text">{{ event.emergency_contact }}</span>
+                                {% if user.is_superuser %}
+                                    <i class="fa fa-edit" id="edit-emergency-contact" title="Edit"></i>
+                                {% endif %}
+                            </span>
+                    </span>
+                        <form id="emergency-form" class="col-12">
+                            <input pattern=".{9,15}" required value="{{ event.emergency_contact }}" id="emergency-input"
+                                   placeholder="Emergency contact (phone)" title="9-15 characters"/>
+                                <i class="fa fa-check" id="validate-emergency-edit" title="Save"></i>
+                                <i class="fa fa-times" style="color:red;" id="close-emergency-edit" title="Close"></i>
+                        </form>
+                </div>
+                <div class="row dashboard-row text-left">
+                        {% if event.is_active %}
+                            <span class="col-12">
+                            <span id="make-inactive-text">This event is marked as <strong>active</strong>.</span>
+                                <span id="make-inactive" class="float-right text-button" style="margin-top: -3px;">
+                                    Mark as inactive
+                                </span>
+                            </span>
+                        {% else %}
+                            <span class="col-12">
+                                <span id="make-active-text">This event is marked as <strong>inactive</strong>.<br/>
+                                    <small>Note: this will mark any existing active event as inactive.</small></span>
+                                <span id="make-active" class="float-right text-button" style="margin-top: -20px;">
+                                    Mark as active
+                                </span>
+                            </span>
+                        {% endif %}
+                </div>
+        </span>
+        </div>
+    </div>
+    <script>
+        let startMarker;
+        let endMarker;
+        let editMarker;
+        let startMap;
+        let endMap;
+        let editMap;
+        let cityType;
+
+        // On geocoder callback, set the city name and update it in the database
+        function geocoderCallback(city) {
+            if (cityType === "start") {
+                $("#start-city-text").text(city);
+            } else if (cityType === "end") {
+                $("#end-city-text").text(city);
+            }
+            $.ajax({
+                method: "POST",
+                url: "{% url 'edit_city_name_event' %}",
+                data: {
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                    event_id: {{ event.pk }},
+                    city_name: city,
+                    type: cityType
+                }
+            });
+        }
+
+
+        function initMap() {
+            // Google maps
+
+            // Start location
+            const latLngStart = new google.maps.LatLng({{ start_location.latitude }}, {{ start_location.longitude }});
+
+            const startOption = {
+                zoom: 8,
+                center: latLngStart
+            };
+            startMap = new google.maps.Map(document.getElementById('start-map-location'), startOption);
+            startMarker = new google.maps.Marker({
+                position: {
+                    lat: {{ start_location.latitude }},
+                    lng: {{ start_location.longitude}}
+                }, map: startMap
+            });
+
+            // End location
+            const latLngEnd = new google.maps.LatLng({{ end_location.latitude }}, {{ end_location.longitude }});
+            const endOption = {
+                zoom: 8,
+                center: latLngEnd
+            };
+            endMap = new google.maps.Map(document.getElementById('end-map-location'), endOption);
+            endMarker = new google.maps.Marker({
+                position: {
+                    lat: {{ end_location.latitude }},
+                    lng: {{ end_location.longitude}}
+                }, map: endMap
+            });
+
+            // Edit map
+            const latLngEdit = new google.maps.LatLng(0.0, 0.0);
+            const editOption = {
+                zoom: 8,
+                center: latLngEdit
+            };
+            editMap = new google.maps.Map(document.getElementById('edit-map'), editOption);
+            editMarker = new google.maps.Marker({
+                position: {
+                    lat: 0.0,
+                    lng: 0.0
+                },
+                map: editMap,
+                draggable: true,
+            });
+
+        }
+
+        $().ready(function () {
+            // City names for start/end locations
+            const startCityText = $("#start-city-text");
+            const startCityForm = $("#start-city-form");
+            const startCity = $(".start-city");
+            const startCityInput = $("#start-city-input");
+            const startCityEditBtn = $("#start-city-edit-btn");
+            const startCitySaveBtn = $("#start-city-save-btn");
+            const startCityCloseBtn = $("#start-city-close-btn");
+            const tdStartCityActions = $("#td-start-city-actions");
+
+            const endCityText = $("#end-city-text");
+            const endCityForm = $("#end-city-form");
+            const endCity = $(".end-city");
+            const endCityInput = $("#end-city-input");
+            const endCityEditBtn = $("#end-city-edit-btn");
+            const endCitySaveBtn = $("#end-city-save-btn");
+            const endCityCloseBtn = $("#end-city-close-btn");
+            const tdEndCityActions = $("#td-end-city-actions");
+
+            // Hide city name forms
+            startCityForm.hide();
+            endCityForm.hide();
+
+            // Hide actions
+            tdStartCityActions.hide();
+            tdEndCityActions.hide();
+
+            // On start city edit
+            startCityEditBtn.click(function () {
+                // Show actions
+                tdStartCityActions.show();
+                // Set form input
+                startCityInput.val(startCityText.text().trim());
+                // Show form and hide text
+                startCity.hide();
+                startCityForm.show();
+            });
+
+            // On start city edit close
+            startCityCloseBtn.click(function () {
+                // Hide form and show city name
+                startCityForm.hide();
+                startCity.show();
+                tdStartCityActions.hide();
+            });
+
+            // On city save
+            function saveCity() {
+                let cityName;
+                // Retrieve value
+                if (cityType === "start") {
+                    cityName = startCityInput.val();
+                } else if (cityType === "end") {
+                    cityName = endCityInput.val();
+                }
+                // Update in database
+                $.ajax({
+                    method: "POST",
+                    url: "{% url 'edit_city_name_event' %}",
+                    data: {
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                        event_id: {{ event.pk }},
+                        city_name: cityName,
+                        type: cityType
+                    },
+                    success: function () {
+                        // Set the city name and hide the form
+                        if (cityType === "start") {
+                            startCityText.text(cityName);
+                            startCityForm.hide();
+                            startCity.show();
+                            tdStartCityActions.hide();
+                        } else if (cityType === "end") {
+                            endCityText.text(cityName);
+                            endCityForm.hide();
+                            endCity.show();
+                            tdEndCityActions.hide();
+                        }
+                    }
+                });
+            }
+
+            // On start city save
+            startCitySaveBtn.click(function () {
+                cityType = "start";
+                saveCity();
+            });
+            startCityForm.submit(function (e) {
+                e.preventDefault();
+                cityType = "start";
+                saveCity()
+            });
+
+            // On end city edit
+            endCityEditBtn.click(function () {
+                // Show actions
+                tdEndCityActions.show();
+                // Set form input
+                endCityInput.val(endCityText.text().trim());
+                // Show form and hide text
+                endCity.hide();
+                endCityForm.show();
+            });
+
+            // On end city edit close
+            endCityCloseBtn.click(function () {
+                // Hide form and show city name
+                endCityForm.hide();
+                endCity.show();
+                tdEndCityActions.hide();
+            });
+
+            // On end city save
+            endCitySaveBtn.click(function () {
+                cityType = "end";
+                saveCity();
+            });
+            endCityForm.submit(function (e) {
+                e.preventDefault();
+                cityType = "end";
+                saveCity();
+            });
+
+            // Maps
+            const closeBtn = $("#close-map");
+            const closeSaveBtn = $("#close-map-save");
+            let startMapOpen = false;
+            let endMapOpen = false;
+
+            // Hide map edit
+            const bigMap = $("#big-map");
+            const eventDashboard = $("#event-dashboard");
+            bigMap.hide();
+
+            // Show map on edit
+            const startMapEditBtn = $("#start-map-edit-btn");
+            const endMapEditBtn = $("#end-map-edit-btn");
+
+            // Edit start location
+            startMapEditBtn.click(function () {
+                // Set the map to foreground and bigger
+                eventDashboard.fadeOut();
+                bigMap.fadeIn();
+                editMarker.setPosition(startMarker.position);
+                editMap.setCenter(editMarker.position);
+                startMapOpen = true;
+            });
+
+            // Edit end location
+            endMapEditBtn.click(function () {
+                // Set the map to foreground and bigger
+                eventDashboard.fadeOut();
+                bigMap.fadeIn();
+                editMarker.setPosition(endMarker.position);
+                editMap.setCenter(editMarker.position);
+                endMapOpen = true;
+            });
+
+            // Close edit screen without saving
+            closeBtn.click(function () {
+                bigMap.fadeOut();
+                eventDashboard.fadeIn();
+            });
+
+            // Close and save new location
+            closeSaveBtn.click(function () {
+                eventDashboard.fadeIn();
+                bigMap.fadeOut();
+
+                // Reset start map
+                if (startMapOpen) {
+                    startMapOpen = false;
+
+                    // Set the start map marker to the edited position
+                    startMarker.setPosition(editMarker.position);
+                    // Recenter the map
+                    startMap.setCenter(startMarker.position);
+
+                    // Update the start location
+                    $.ajax({
+                        type: "POST",
+                        url: "{% url 'edit_event_location' event.pk %}",
+                        data: {
+                            latitude: startMarker.position.lat(),
+                            longitude: startMarker.position.lng(),
+                            location_type: 'start',
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                        },
+                        success: function () {
+                            // Reverse geocode the city name
+                            cityType = "start";
+                            geocodeLatLng(startMarker.position.lat(), startMarker.position.lng());
+                        }
+                    });
+                }
+
+                // Reset end map
+                if (endMapOpen) {
+                    endMapOpen = false;
+
+                    // Set the end map marker to the edited position
+                    endMarker.setPosition(editMarker.position);
+                    // Recenter the map
+                    endMap.setCenter(endMarker.position);
+
+                    // Update the end location
+                    $.ajax({
+                        type: "POST",
+                        url: "{% url 'edit_event_location' event.pk %}",
+                        data: {
+                            latitude: endMarker.position.lat(),
+                            longitude: endMarker.position.lng(),
+                            location_type: 'end',
+                            csrfmiddlewaretoken: '{{ csrf_token }}'
+                        },
+                        success: function () {
+                            // Reverse geocode the city name
+                            cityType = "end";
+                            geocodeLatLng(endMarker.position.lat(), endMarker.position.lng());
+                        }
+                    });
+                }
+            });
+
+            // Options for date/time picker
+            const options = {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'};
+
+            // Emergency contact edit
+            const emergencyContact = $("#emergency-contact");
+            const emergencyContactText = $("#emergency-contact-text");
+            const emergencyContactForm = $("#emergency-form");
+            const emergencyContactInput = $("#emergency-input");
+            const emergencyContactEditBtn = $("#edit-emergency-contact");
+            const emergencyContactCloseBtn = $("#close-emergency-edit");
+            const emergencyContactSaveBtn = $("#validate-emergency-edit");
+
+            // On load, hide form
+            emergencyContactForm.hide();
+
+            // On click edit
+            emergencyContactEditBtn.click(function () {
+                // Get the text
+                let phone = emergencyContactText.text().trim();
+                // Set the form value to the correct text
+                emergencyContactInput.val(phone);
+                // Hide the text
+                emergencyContact.hide();
+                // Show the form
+                emergencyContactForm.show();
+            });
+
+            // On click close
+            emergencyContactCloseBtn.click(function () {
+                // Hide the form
+                emergencyContactForm.hide();
+                // Show the text
+                emergencyContact.show();
+            });
+
+            // Emergency event save function
+            function saveEmergencyContact() {
+                // Retrieve the text
+                let phone = emergencyContactInput.val().trim();
+                // Update database
+                $.ajax({
+                    method: "POST",
+                    url: "{% url 'edit_event' event.pk %}",
+                    data: {
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                        emergency_contact: phone
+                    },
+                    success: function () {
+                        // Hide form
+                        emergencyContactForm.hide();
+                        // Set new phone number
+                        emergencyContactText.text(phone);
+                        // Show text
+                        emergencyContact.show();
+                    }
+                });
+            }
+
+            // On click save
+            emergencyContactSaveBtn.click(function () {
+                saveEmergencyContact();
+            });
+            emergencyContactForm.submit(function (e) {
+                e.preventDefault();
+                saveEmergencyContact();
+            });
+
+            // Title edit
+
+            const title = $("#title");
+            const titleText = $("#title-text");
+            const titleEditBtn = $("#title-edit-btn");
+            const titleEdit = $("#title-edit");
+            const titleInput = $("#title-input");
+            const titleForm = $("#title-form");
+            const validateForm = $("#validate-title-edit");
+            const closeTitleForm = $("#close-title-edit");
+
+            titleEdit.hide();
+
+            // Click on edit title
+            titleEditBtn.click(function () {
+                title.hide();
+                titleInput.val(title.text().trim());
+                titleEdit.show();
+            });
+
+            // Save title
+            function saveTitle() {
+                const title_text = titleInput.val();
+
+                titleText.text(title_text);
+                titleEdit.hide();
+                title.show();
+
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'edit_event' event.pk %}",
+                    data: {
+                        title: title_text,
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                    }
+                });
+            }
+
+            // On submit (enter key)
+            titleForm.submit(function (e) {
+                e.preventDefault();
+                saveTitle();
+            });
+            // On submit (click button)
+            validateForm.click(function () {
+                saveTitle();
+            });
+
+            // Cancel title edit
+            closeTitleForm.click(function () {
+                titleEdit.hide();
+                title.show();
+            });
+
+
+            // Start date edit
+            const startDateText = $("#start-date-text");
+            const startDateBtn = $("#start-date-edit-btn");
+            const startDateForm = $("#start-date-form");
+            const startDateInput = $("#start-date-input");
+            const startDateSaveBtn = $("#start-date-save-btn");
+            const tdStartDateForm = $("#td-start-date-form");
+            const tdStartDateSave = $("#td-start-date-save");
+            const startDateDiscard = $("#start-date-close-btn");
+
+            // Prevent default form action
+            startDateForm.submit(function (e) {
+                e.preventDefault();
+            });
+            //Datetime picker
+            startDateInput.datetimepicker({
+                timeInput: true,
+                controlType: 'select',
+                oneLine: true,
+                timeFormat: 'HH:mm',
+                dateFormat: 'yy-mm-dd',
+                stepMinute: 15
+            });
+
+            tdStartDateSave.hide();
+            tdStartDateForm.hide();
+            startDateForm.hide();
+            startDateSaveBtn.hide();
+            startDateInput.val(startDateText.text().trim());
+
+            // On start date edit button
+            startDateBtn.click(function () {
+                startDateBtn.hide();
+                startDateText.hide();
+                startDateForm.show();
+                startDateSaveBtn.show();
+                tdStartDateSave.show();
+                tdStartDateForm.show();
+            });
+
+            // On start date save
+            startDateSaveBtn.click(function () {
+                const new_date = startDateInput.val();
+                const date = new Date(new_date);
+                startDateText.text(date.toLocaleString('nl-NL', options));
+                startDateForm.hide();
+                startDateSaveBtn.hide();
+                startDateText.show();
+                startDateBtn.show();
+                tdStartDateSave.hide();
+                tdStartDateForm.hide();
+
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'edit_event' event.pk %}",
+                    data: {
+                        start_date: new_date,
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                    }
+                });
+            });
+
+            // On start date discard
+            startDateDiscard.click(function () {
+                startDateForm.hide();
+                startDateSaveBtn.hide();
+                startDateText.show();
+                startDateBtn.show();
+                tdStartDateSave.hide();
+                tdStartDateForm.hide();
+            });
+
+            // End date edit
+            const endDateText = $("#end-date-text");
+            const endDateBtn = $("#end-date-edit-btn");
+            const endDateForm = $("#end-date-form");
+            const endDateInput = $("#end-date-input");
+            const endDateSaveBtn = $("#end-date-save-btn");
+            const tdEndDateForm = $("#td-end-date-form");
+            const tdEndDateSave = $("#td-end-date-save");
+            const endDateDiscard = $("#end-date-close-btn");
+
+            // Prevent default form action
+            endDateForm.submit(function (e) {
+                e.preventDefault();
+            });
+            // Datetime picker
+            endDateInput.datetimepicker({
+                timeInput: true,
+                controlType: 'select',
+                oneLine: true,
+                timeFormat: 'HH:mm',
+                dateFormat: 'yy-mm-dd',
+                stepMinute: 15
+            });
+
+            tdEndDateSave.hide();
+            tdEndDateForm.hide();
+            endDateForm.hide();
+            endDateSaveBtn.hide();
+            endDateInput.val(endDateText.text().trim());
+
+            // On end date edit button
+            endDateBtn.click(function () {
+                endDateBtn.hide();
+                endDateText.hide();
+                tdEndDateForm.show();
+                tdEndDateSave.show();
+                endDateSaveBtn.show();
+                endDateForm.show();
+            });
+
+            // On end date save
+            endDateSaveBtn.click(function () {
+                const new_date = endDateInput.val();
+                const date = new Date(new_date);
+                endDateText.text(date.toLocaleString('nl-NL', options));
+                endDateForm.hide();
+                endDateSaveBtn.hide();
+                endDateText.show();
+                endDateBtn.show();
+                tdEndDateSave.hide();
+                tdEndDateForm.hide();
+
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'edit_event' event.pk %}",
+                    data: {
+                        end_date: new_date,
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                    }
+                });
+            });
+
+            // On end date discard
+            endDateDiscard.click(function () {
+                endDateForm.hide();
+                endDateSaveBtn.hide();
+                endDateText.show();
+                endDateBtn.show();
+                tdEndDateSave.hide();
+                tdEndDateForm.hide();
+            });
+
+            // Event deletion
+            $("#event-delete-confirm-btn").click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    type: "GET",
+                    url: "{% url 'delete_event' event.pk %}",
+                    success: function () {
+                        window.location = '{% url 'event_list' %}';
+                    }
+                })
+            });
+
+            // Mark event as active
+            $("#make-active").click(function () {
+                $.ajax({
+                    type: "GET",
+                    url: "{% url 'make_event_active' event.pk %}",
+                    success: function () {
+                        window.location = "{% url 'edit_event' event.pk %}";
+                    }
+                });
+            });
+            // Mark event as inactive
+            $("#make-inactive").click(function () {
+                $.ajax({
+                    type: "GET",
+                    url: "{% url 'make_event_inactive' event.pk %}",
+                    success: function () {
+                        window.location = "{% url 'edit_event' event.pk %}";
+                    }
+                });
+            });
+
+            // Team deletion
+            let teamId;
+            $(".delete-team-icon").click(function () {
+                // Get the Team ID
+                teamId = $(this).attr('id');
+                teamId = teamId.replace(/\D+/g, '');
+
+                // Get the team members
+                let teamMembers = $("#team-members-" + teamId).text();
+
+                // Set the modal text
+                $("#team-deletion-modal-text").html('Are you sure you want to delete this team ?<br/><br/>' +
+                    'The team members are:<br/>' + teamMembers + '<br/><br/><span style="color: red">' +
+                    ' Note: This will delete all associated scores and routes.<br/>This is irreversible!</span>');
+
+                // Show the modal
+                $("#team-deletion-modal").modal('show');
+            });
+
+            // On click confirm button
+            $("#team-delete-confirm-btn").click(function () {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'delete_team' %}",
+                    data: {
+                        id: teamId,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function () {
+                        // Remove team from dashboard
+                        $("#team-row-" + teamId).remove();
+                        // Close the modal
+                        $("#team-deletion-modal").modal('hide');
+                    }
+                });
+            });
+
+            // Team disqualification
+            $(".team-disqualify-btn").click(function () {
+                // Get the Team ID
+                teamId = $(this).attr('id');
+                teamId = teamId.replace(/\D+/g, '');
+
+                // Get the team members
+                let teamMembers = $("#team-members-" + teamId).text();
+
+                // Set the modal text
+                $("#team-disqualification-modal-text").html('Are you sure you want to disqualify this team ?<br/><br/>' +
+                    'The team members are:<br/>' + teamMembers);
+
+                // Show the modal
+                $("#team-disqualification-modal").modal('show');
+            });
+
+            // On click confirm button
+            $("#team-disqualification-confirm-btn").click(function () {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'disqualify_team' %}",
+                    data: {
+                        id: teamId,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function () {
+                        // Reload the page
+                        location.reload();
+                    },
+                    error: function (a, text, error) {
+                        console.log(text + ":" + error);
+                    }
+                });
+            });
+
+            // Remove disqualification
+            $(".team-undisqualify-btn").click(function () {
+                // Get the Team ID
+                teamId = $(this).attr('id');
+                teamId = teamId.replace(/\D+/g, '');
+
+                $.ajax({
+                    method: "POST",
+                    url: "{% url 'undisqualify_team' %}",
+                    data: {
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                        id: teamId
+                    },
+                    success: function () {
+                        location.reload();
+                    }
+                });
+            });
+
+            // Sub-destination deletion
+            let subLocationId;
+            $(".delete-sublocation-icon").click(function () {
+
+                // Get the sub-destination ID
+                subLocationId = $(this).attr('id');
+                subLocationId = subLocationId.replace(/\D+/g, '');
+
+                // Get the sub-destination name
+                let subLocationName = $("#sublocation-name-" + subLocationId).text().trim();
+
+                // Set the modal text
+                $("#sublocation-deletion-text").html('Are you sure you want to delete the sub-destination "'
+                    + subLocationName + '"?<br/><br/>' +
+                    '<span style="color: red">Note: This is irreversible!</span>');
+
+                // Show the modal
+                $("#subdestination-deletion-modal").modal('show');
+            });
+
+            // On click confirm button
+            $("#sublocation-delete-confirm-btn").click(function () {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'delete_sublocation' %}",
+                    data: {
+                        id: subLocationId,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function () {
+                        location.reload();
+                    }
+                });
+            });
+
+            // Challenge deletion
+            let challengeId;
+            $(".delete-challenge-icon").click(function () {
+
+                // Get the challenge ID
+                challengeId = $(this).attr('id');
+                challengeId = challengeId.replace(/\D+/g, '');
+
+                // Get the challenge name
+                let challengeName = $("#challenge-name-" + challengeId).text().trim();
+
+                // Set the modal text
+                $("#challenge-deletion-text").html('Are you sure you want to delete the challenge "'
+                    + challengeName + '"?<br/><br/>' +
+                    '<span style="color: red">Note: This is irreversible!</span>');
+
+                // Show the modal
+                $("#challenge-deletion-modal").modal('show');
+            });
+
+            // On click confirm button
+            $("#challenge-delete-confirm-btn").click(function () {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'delete_challenge' %}",
+                    data: {
+                        id: challengeId,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function () {
+                        location.reload();
+                    }
+                });
+            });
+
+            // Winner deletion
+
+            $("#remove-winner").click(function () {
+                // Show the modal
+                $("#winner-deletion-modal").modal('show');
+            });
+
+            // On click confirm button
+            $("#winner-delete-confirm-btn").click(function () {
+                $.ajax({
+                    type: "GET",
+                    url: "{% url 'delete_winner' event.pk %}",
+                    success: function () {
+                        // Reload page
+                        location.reload();
+                    }
+                });
+            });
+        });
+
+
+    </script>
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key{{ gmaps_key }}&callback=initMap">
+    </script>
+{% endblock %}

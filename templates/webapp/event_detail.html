@@ -1,0 +1,211 @@
+{% extends "webapp/base.html" %}
+
+{% block head %}<title>lifTUe - Event results</title>{% endblock %}
+
+{% block content %}
+    <div class="text-center">
+        <h2>{{ event.title }}</h2>
+        <hr/>
+    </div>
+    <div class="text-center" id="contest-list">
+        {% if winning_team %}
+            <h3>Winners:
+                {% for name in winning_team %}
+                    {{ name }}
+                    {% if not forloop.last %}
+                        &amp;
+                    {% endif %}
+                {% endfor %}
+            </h3>
+            <img src="/{{ photo.url }}" alt="Winning team picture" class="col-12"
+                 style="margin-bottom: 20px; max-height:50vh; width:auto; height: auto;"/>
+        {% endif %}
+        <h3>Team routes</h3>
+        <div id="event-map">
+            <script>
+                const CSS_COLOR_NAMES = ["Aqua", "Aquamarine",
+                    "Black", "Blue", "BlueViolet", "Brown", "CadetBlue", "Chartreuse",
+                    "Chocolate", "Coral", "CornflowerBlue", "Crimson", "Cyan", "DarkBlue", "DarkCyan",
+                    "DarkGoldenRod", "DarkGray", "DarkGrey", "DarkGreen", "DarkKhaki", "DarkMagenta", "DarkOliveGreen",
+                    "DarkOrange", "DarkOrchid", "DarkRed", "DarkSalmon", "DarkSeaGreen", "DarkSlateBlue", "DarkSlateGray",
+                    "DarkSlateGrey", "DarkTurquoise", "DarkViolet", "DeepPink", "DeepSkyBlue", "DimGray", "DimGrey",
+                    "DodgerBlue", "FireBrick", "ForestGreen", "Fuchsia", "Gainsboro",
+                    "Gold", "GoldenRod", "Gray", "Grey", "Green", "GreenYellow", "HotPink",
+                    "IndianRed", "Indigo", "Khaki", "LawnGreen",
+                    "LightBlue", "LightCoral", "LightGray", "LightGrey", "LightGreen",
+                    "LightPink", "LightSalmon", "LightSeaGreen", "LightSkyBlue", "LightSlateGray", "LightSlateGrey",
+                    "LightSteelBlue", "Lime", "LimeGreen", "Magenta", "Maroon", "MediumAquaMarine",
+                    "MediumBlue", "MediumOrchid", "MediumPurple", "MediumSeaGreen", "MediumSlateBlue", "MediumSpringGreen",
+                    "MediumTurquoise", "MediumVioletRed", "MidnightBlue",
+                    "Navy", "Olive", "OliveDrab", "Orange", "OrangeRed", "Orchid",
+                    "PaleGreen", "Peru", "Pink", "Plum",
+                    "PowderBlue", "Purple", "Red", "RosyBrown", "RoyalBlue", "SaddleBrown", "Salmon", "SandyBrown",
+                    "SeaGreen", "Sienna", "Silver", "SkyBlue", "SlateBlue", "SlateGray", "SlateGrey",
+                    "SpringGreen", "SteelBlue", "Tan", "Teal", "Thistle", "Tomato", "Turquoise", "Violet",
+                    "Yellow", "YellowGreen"];
+
+                let teams = [];
+                {% for team in teams %}
+                    teams.push({{ team.pk }});
+                {% endfor %}
+
+                // Assign a color to each team
+                let teamColor = [];
+                let mapping = {};
+                let colorId;
+                let color;
+                for (let i = 0; i < teams.length; i++) {
+                    // Get a number between 1 and length(CSS_COLOR_NAMES)
+                    colorId = (teams[i] + 3) % CSS_COLOR_NAMES.length;
+                    color = CSS_COLOR_NAMES[colorId];
+                    teamColor.push(color);
+                    mapping[teams[i]] = color;
+                }
+
+                let map;
+
+                function initMap() {
+                    map = new google.maps.Map(document.getElementById('event-map'), {
+                        center: {lat: 51.44083, lng: 5.47778},
+                        zoom: 8
+                    });
+
+                    const startLatitude = parseFloat("{{ event.start_location.latitude }}");
+                    const startLongitude = parseFloat("{{ event.start_location.longitude }}");
+                    const endLatitude = parseFloat("{{ event.end_location.latitude }}");
+                    const endLongitude = parseFloat("{{ event.end_location.longitude }}");
+
+                    const startLocationImage = 'https://png.icons8.com/color/50/000000/green-flag.png';
+                    const endLocationImage = 'https://png.icons8.com/metro/52/000000/finish-flag.png';
+                    const subLocationImage = 'https://png.icons8.com/windows/52/000000/map-pin.png';
+
+                    const startLocation = {lat: startLatitude, lng: startLongitude};
+                    const endLocation = {lat: endLatitude, lng: endLongitude};
+
+                    // Start location marker
+                    new google.maps.Marker({
+                        position: startLocation,
+                        map: map,
+                        icon: startLocationImage
+                    });
+
+                    // End location marker
+                    new google.maps.Marker({
+                        position: endLocation,
+                        map: map,
+                        icon: endLocationImage
+                    });
+                    let subLatitude;
+                    let subLongitude;
+                    let subLocation;
+
+                    {% if subdestinations %}
+                        {% for subdestination in subdestinations %}
+                            subLatitude = parseFloat("{{ subdestination.location.latitude }}");
+                            subLongitude = parseFloat("{{ subdestination.location.longitude }}");
+                            subLocation = {lat: subLatitude, lng: subLongitude};
+                            new google.maps.Marker({
+                                position: subLocation,
+                                map: map,
+                                icon: subLocationImage
+                            });
+                        {% endfor %}
+
+                        let teamRoutes = {{ team_routes|safe }};
+
+                        // add all segments to the map
+                        for (i = 0; i < teamRoutes.length; i++) {
+                            // Get team color
+                            const teamId = teams.indexOf(teamRoutes[i][0]);
+                            const color = teamColor[teamId];
+                            const locations = teamRoutes[i].slice(1);
+                            const polyline = new google.maps.Polyline({
+                                path: locations,
+                                geodesic: true,
+                                strokeColor: color
+                            });
+                            polyline.setMap(map);
+                        }
+                    {% endif %}
+                }
+            </script>
+            <script src="https://maps.googleapis.com/maps/api/js?key={{ gmaps_key }}&callback=initMap"
+                    async defer></script>
+        </div>
+        <h6>Team colors</h6>
+        <table class="table col-12">
+            <tbody>
+            {% for team in team_data %}
+                <td>
+                    <div class="row team-color">
+                        <span class="event-team-color" id="team-color-{{ team.team_id }}"></span>
+                        <span class="team-members">
+                        {% for name in team.members %}
+                            {{ name }}
+                            {% if not forloop.last %}
+                                &amp;
+                            {% endif %}
+                        {% endfor %}
+                    </span>
+                    </div>
+                </td>
+            {% endfor %}
+            </tbody>
+        </table>
+        <script>
+            $().ready(function () {
+                $('.event-team-color').each(function () {
+                    let teamId = $(this).attr('id').replace(/\D+/g, '');
+                    let color = mapping[teamId];
+                    $(this).css("background-color", color);
+                });
+            });
+        </script>
+        <h3>Scoreboard</h3>
+        <div class="col-12">
+            <table class="table-striped table-bordered col-12">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Team members</th>
+                    {% for name in segment_names %}
+                        <th>{{ name }}</th>
+                    {% endfor %}
+                    <th>Total travel time</th>
+                    <th>Bonus time</th>
+                    <th>Total time</th>
+                    <th>Disqualified</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for team in team_data %}
+                    <tr {% if team.is_disqualified %} class="danger" {% endif %}>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            {% for name in team.members %}
+                                {{ name }}
+                                {% if not forloop.last %}
+                                    &amp;
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                        {% for segment in team.segments %}
+                            <td>{{ segment.time }}</td>
+                        {% endfor %}
+                        <td>{{ team.travel_time }}</td>
+                        <td>{{ team.bonus_time }}</td>
+                        <td>{{ team.final_time }}</td>
+                        <td>
+                            {% if team.is_disqualified %}
+                                <i class="fa fa-times-circle no-click" style="color: red"></i>
+                            {% else %}
+                                <i class="fa fa-check-circle no-click" style="color: green;"></i>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
