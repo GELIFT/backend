@@ -28,16 +28,17 @@ DEBUG = False
 
 # ----------- CHANGE VALUES HERE -----------------------------
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
+
 ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOSTS')]
 GMAPS_API_KEY = os.environ.get('GMAPS_API_KEY')
 FIREBASE_KEY = os.environ.get('FIREBASE_KEY')
-STATICFILES_DIRS = [
-    os.environ.get('STATICFILES_DIRS')
-]
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'))
 # Do not forget the "/" at the end of URL, MEDIA_ROOT and MEDIA_URL
 URL = os.environ.get('URL')
-MEDIA_ROOT = os.environ.get('MEDIA_ROOT')
-MEDIA_URL = os.environ.get('MEDIA_URL')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static', 'media')
+MEDIA_URL = 'static/media/'
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
