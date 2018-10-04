@@ -19,7 +19,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'sbjusvd3re$q@b@o)7k*0@vr_-^!6(md@kzw(#q%3^4g16&l5g'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -28,30 +28,30 @@ DEBUG = False
 
 # ----------- CHANGE VALUES HERE -----------------------------
 
-ALLOWED_HOSTS = ['gelift.win.tue.nl']
-GMAPS_API_KEY = "AIzaSyA88aymL5Qn5RhVAjCXanY_xjl4KhqfDFQ"
-FIREBASE_KEY = "AAAAA9nkfCE:APA91bEpXyMrPIrR23E2zBkyHD5Ei5zymrI4Sd_dTgogkQOV1RAQ4ov1yp4RfzBeB0wR5aJL5JEmjbdlGuyA-tr92arV2tlmzIRiy3YfBLLrzMOzPfdvJXoa5KJzciHYJNCFt20-4m_l"
+ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOSTS')]
+GMAPS_API_KEY = os.environ.get('GMAPS_API_KEY')
+FIREBASE_KEY = os.environ.get('FIREBASE_KEY')
 STATICFILES_DIRS = [
-    '/srv/http/gelift/static/'
+    os.environ.get('STATICFILES_DIRS')
 ]
 # Do not forget the "/" at the end of URL, MEDIA_ROOT and MEDIA_URL
-URL = 'https://gelift.win.tue.nl/'
-MEDIA_ROOT = '/srv/http/gelift/static/media/'
-MEDIA_URL = 'static/media/'
+URL = os.environ.get('URL')
+MEDIA_ROOT = os.environ.get('MEDIA_ROOT')
+MEDIA_URL = os.environ.get('MEDIA_URL')
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'gelift',
-        'USER': 'gelift',
-        'PASSWORD': '1234',
-        'HOST': 'localhost',
-        'PORT': ''
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'gelift',
+#         'USER': 'gelift',
+#         'PASSWORD': '1234',
+#         'HOST': 'localhost',
+#         'PORT': ''
+#     }
+# }
 
 # Email settings
 EMAIL_USE_TLS = False
